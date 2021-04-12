@@ -1,30 +1,44 @@
 const express = require('express');
-require('dotenv').config();
 const cors = require('cors');
-const data = require('./data/weather.json')
+// actually use the .env file I created
+require('dotenv').config();
+// import the json file
+const weatherData = require('./data/weather.json')
 
 const app = express();
 
+// makes sure our data is accessible from the React frontend
 app.use(cors());
 
 const PORT = process.env.PORT || 3001;
 
-const myTargetList = ['shoes', 'bags', 'games', 'cleaning supples'];
-
+// most of your actual server definition goes here
+// A server's job is to listen at some path for a particular method
+// listening for GET requests at the path /
 app.get('/', (request, response) => {
-  response.send('hello from the home route!');
+  // when we get that request, send a response that says 'hello!'
+  // response has some methods that are very helpful, such as a send method
+  response.send('hello!');
 });
 
-app.get('/bananas', (request, response) => {
-  response.json({"bananas":"are cool"})
+// Constructor function for Forecast objects
+function Forecast(date, description) {
+  this.date = date;
+  this.description = description;
+}
+
+
+app.get('/weather', (request, response) => {
+  
+  let dailyForecast = weatherData.data
+  const forecast = dailyForecast.map(forecast => (
+    {
+      description: forecast.weather.description,
+      date: forecast.datetime
+    }
+    ));
+    response.send(forecast)
+  
 });
 
-app.get('/shoppingList', (request, response) => {
-  response.status(200).send(myTargetList);
-});
-
-app.get('*', (request, response) => {
-  response.status(404).send('not found');
-})
-
-app.listen(PORT, () => console.log(`listening on ${PORT}`));
+app.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));
