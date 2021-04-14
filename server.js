@@ -1,3 +1,5 @@
+'use strict'
+
 const express = require('express');
 const cors = require('cors');
 // actually use the .env file I created
@@ -22,23 +24,25 @@ app.get('/', (request, response) => {
 });
 
 // Constructor function for Forecast objects
-function Forecast(date, description) {
-  this.date = date;
-  this.description = description;
+function DailyForecast(day) {
+  this.date = day.datetime;
+  this.description = day.weather.description;
+}
+
+function handleErrors(error, response){
+response.status(500).send('Internal error')
 }
 
 
-app.get('/weather', (request, response) => {
-  
-  let dailyForecast = weatherData.data
-  const forecast = dailyForecast.map(forecast => (
-    {
-      description: forecast.weather.description,
-      date: forecast.datetime
+  app.get('/weather', (request, response) => {
+    try{
+    let dailyForecast = weatherData.data.map(day => new DailyForecast(day));
+    response.send(dailyForecast)
+    }catch(error){
+      handleErrors(error, response)
     }
-    ));
-    response.send(forecast)
-  
-});
+    });
+
+
 
 app.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));
