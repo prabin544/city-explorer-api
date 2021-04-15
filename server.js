@@ -2,6 +2,7 @@
 
 const express = require('express');
 const cors = require('cors');
+const superagent = require('superagent');
 // actually use the .env file I created
 require('dotenv').config();
 // import the json file
@@ -34,15 +35,31 @@ response.status(500).send('Internal error')
 }
 
 
-  app.get('/weather', (request, response) => {
-    try{
-    let dailyForecast = weatherData.data.map(day => new DailyForecast(day));
-    response.send(dailyForecast)
-    }catch(error){
-      handleErrors(error, response)
-    }
-    });
+// app.get('/weather', (request, response) => {
+//   try{
+//   let dailyForecast = weatherData.data.map(day => new DailyForecast(day));
+//   response.send(dailyForecast)
+//   }catch(error){
+//     handleErrors(error, response)
+//   }
+//   });
 
+app.get('/weather', (request, response) => {
+  superagent.get('https://api.weatherbit.io/v2.0/forecast/daily')
+    // .query lets us break up the query parameters using an object instead of a string
+    .query({
+      key: process.env.WEATHER_API_KEY,
+      units: 'I',
+      lat: request.query.lat,
+      lon: request.query.lon
+    })
+    .then(weatherData => {
+      console.log(weatherData.body.city_name)
+      response.json(weatherData.body.data.map(x => (
+        {date: x.valid_date,
+          description: x.weather.description})));
+    });
+});
 
 
 app.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));
