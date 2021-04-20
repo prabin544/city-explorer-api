@@ -36,7 +36,7 @@ function MovieDisplay(movie) {
   this.overview = movie.overview;
   this.average_votes = movie.vote_average;
   this.total_votes = movie.vote_count;
-  this.image_url = movie.poster_path;
+  this.image_url = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
   this.popularity = movie.popularity;
   this.released_on = movie.release_date
 }
@@ -62,15 +62,12 @@ app.get('/weather', (request, response) => {
 
 app.get('/movies', (request, response) => {
   console.log(request.query.citySearchedFor)
-  //https://api.themoviedb.org/3/search/movie?api_key=418e0968fd02dcb8697ba1b3b8c4056a&query=seattle
   superagent.get('https://api.themoviedb.org/3/search/movie')
-    // .query lets us break up the query parameters using an object instead of a string
     .query({
       api_key: process.env.MOVIE_API_KEY,
       query: request.query.citySearchedFor
     })
     .then(movieData => {
-      // console.log(movieData.body)
       response.json(movieData.body.results.map(movie => 
         (new MovieDisplay(movie))));
     });
