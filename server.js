@@ -25,53 +25,58 @@ app.get('/', (request, response) => {
 });
 
 // Constructor function for Forecast objects
-function DailyForecast(day) {
-  this.date = day.datetime;
-  this.description = day.weather.description;
-}
+// function DailyForecast(day) {
+//   this.date = day.datetime;
+//   this.description = day.weather.description;
+// }
 
 // Constructor function for Movie objects
-function MovieDisplay(movie) {
-  this.title = movie.original_title;
-  this.overview = movie.overview;
-  this.average_votes = movie.vote_average;
-  this.total_votes = movie.vote_count;
-  this.image_url = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
-  this.popularity = movie.popularity;
-  this.released_on = movie.release_date
-}
+// function MovieDisplay(movie) {
+//   this.title = movie.original_title;
+//   this.overview = movie.overview;
+//   this.average_votes = movie.vote_average;
+//   this.total_votes = movie.vote_count;
+//   this.image_url = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
+//   this.popularity = movie.popularity;
+//   this.released_on = movie.release_date
+// }
 
 function handleErrors(error, response){
 response.status(500).send('Internal error')
 }
 
-app.get('/weather', (request, response) => {
-  superagent.get('https://api.weatherbit.io/v2.0/forecast/daily')
-    // .query lets us break up the query parameters using an object instead of a string
-    .query({
-      key: process.env.WEATHER_API_KEY,
-      units: 'I',
-      lat: request.query.lat,
-      lon: request.query.lon
-    })
-    .then(weatherData => {
-      response.json(weatherData.body.data.map(day => 
-        (new DailyForecast(day))));
-    });
-});
+// app.get('/weather', (request, response) => {
+//   superagent.get('https://api.weatherbit.io/v2.0/forecast/daily')
+//     // .query lets us break up the query parameters using an object instead of a string
+//     .query({
+//       key: process.env.WEATHER_API_KEY,
+//       units: 'I',
+//       lat: request.query.lat,
+//       lon: request.query.lon
+//     })
+//     .then(weatherData => {
+//       response.json(weatherData.body.data.map(day => 
+//         (new DailyForecast(day))));
+//     });
+// });
 
-app.get('/movies', (request, response) => {
-  console.log(request.query.citySearchedFor)
-  superagent.get('https://api.themoviedb.org/3/search/movie')
-    .query({
-      api_key: process.env.MOVIE_API_KEY,
-      query: request.query.citySearchedFor
-    })
-    .then(movieData => {
-      response.json(movieData.body.results.map(movie => 
-        (new MovieDisplay(movie))));
-    });
-});
+// app.get('/movies', (request, response) => {
+//   console.log(request.query.citySearchedFor)
+//   superagent.get('https://api.themoviedb.org/3/search/movie')
+//     .query({
+//       api_key: process.env.MOVIE_API_KEY,
+//       query: request.query.citySearchedFor
+//     })
+//     .then(movieData => {
+//       response.json(movieData.body.results.map(movie => 
+//         (new MovieDisplay(movie))));
+//     });
+// });
+const getMovies = require('./handlers/getMovies');
+app.get('/movies', getMovies);
+
+const getWeather = require('./handlers/getWeather');
+app.get('/weather', getWeather);
 
 
 app.listen(PORT, () => console.log(`Server is listening on port ${PORT}`));
